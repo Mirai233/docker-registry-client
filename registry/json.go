@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -26,13 +27,23 @@ func (registry *Registry) getPaginatedJSON(url string, response interface{}) (st
 	if err != nil {
 		return "", err
 	}
-	return getNextLink(resp)
+
+	url, err = getNextLink(resp)
+	if err != nil {
+		return "", err
+	}
+
+	if strings.Contains(url, "://") {
+		return url, nil
+	}
+
+	return registry.url(url), nil
 }
 
 // Matches an RFC 5988 (https://tools.ietf.org/html/rfc5988#section-5)
 // Link header. For example,
 //
-//    <http://registry.example.com/v2/_catalog?n=5&last=tag5>; type="application/json"; rel="next"
+//	<http://registry.example.com/v2/_catalog?n=5&last=tag5>; type="application/json"; rel="next"
 //
 // The URL is _supposed_ to be wrapped by angle brackets `< ... >`,
 // but e.g., quay.io does not include them. Similarly, params like
