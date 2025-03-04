@@ -3,6 +3,7 @@ package registry
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -37,7 +38,7 @@ func (registry *Registry) getPaginatedJSON(url string, response interface{}) (st
 		return url, nil
 	}
 
-	return registry.url(url), nil
+	return fmt.Sprintf("%s%s", registry.URL, url), nil
 }
 
 // Matches an RFC 5988 (https://tools.ietf.org/html/rfc5988#section-5)
