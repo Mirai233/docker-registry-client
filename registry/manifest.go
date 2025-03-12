@@ -74,10 +74,18 @@ func (registry *Registry) ManifestDigest(repository, reference string) (digest.D
 	url := registry.url("/v2/%s/manifests/%s", repository, reference)
 	registry.Logf("registry.manifest.head url=%s repository=%s reference=%s", url, repository, reference)
 
-	resp, err := registry.Client.Head(url)
-	if resp != nil {
-		defer resp.Body.Close()
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
 	}
+
+	req.Header.Set("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.index.v1+json")
+	resp, err := registry.Client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
 	if err != nil {
 		return "", err
 	}
